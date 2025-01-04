@@ -1,4 +1,5 @@
 import ChatView from "@/components/index/ChatView";
+import Temperature from "@/components/index/Temperature";
 import { ThemedText } from "@/components/other/ThemedText";
 import { ThemedView } from "@/components/other/ThemedView";
 import { Colors } from "@/constants/Colors";
@@ -18,6 +19,7 @@ export default function Index() {
       >
         Rybaslav Panel
       </ThemedText>
+      <Temperature />
       <ChatView />
     </ThemedView>
   );
