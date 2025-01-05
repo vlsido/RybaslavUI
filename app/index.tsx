@@ -1,9 +1,10 @@
-import ChatView from "@/components/index/ChatView";
+import ChatView from "@/components/index/Chat/ChatView";
+import StorageData from "@/components/index/StorageData";
 import Temperature from "@/components/index/Temperature";
 import { ThemedText } from "@/components/other/ThemedText";
 import { ThemedView } from "@/components/other/ThemedView";
 import { Colors } from "@/constants/Colors";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function Index() {
   return (
@@ -12,14 +13,24 @@ export default function Index() {
       darkColor={Colors.dark.background}
       style={styles.container}
     >
-      <ThemedText
-        lightColor={Colors.light.text}
-        darkColor={Colors.dark.text}
-        style={styles.titleText}
-      >
-        Rybaslav Panel
-      </ThemedText>
-      <Temperature />
+      <View style={{
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        marginVertical: 10
+      }}>
+
+        <StorageData />
+        <ThemedText
+          lightColor={Colors.light.text}
+          darkColor={Colors.dark.text}
+          style={styles.titleText}
+        >
+          Rybaslav Panel
+        </ThemedText>
+        <Temperature />
+      </View>
       <ChatView />
     </ThemedView>
   );
@@ -28,13 +39,10 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
   },
   titleText: {
     fontSize: 16,
-    position: "absolute",
-    top: "5%",
     opacity: 0.5
   }
 });
