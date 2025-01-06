@@ -158,7 +158,9 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 20,
     color: "rgb(233,234,233)",
-    flex: 1
+    flex: 1,
+    // Works on web
+    outlineStyle: "none"
   },
   sendMessageContainer: {
     position: "absolute",
