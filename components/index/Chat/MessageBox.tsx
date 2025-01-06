@@ -19,7 +19,7 @@ function MessageBox(props: MessageBoxProps) {
         alignItems: "center"
       }]}
     >
-      <Avatar />
+      <Avatar user={props.user} />
       <View style={styles.messageContainer}>
         <ThemedText
           style={[styles.messageText, {
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   messageContainer: {
     flex: 1,
     justifyContent: "center",
-    marginRight: 10,
+    marginHorizontal: 10,
   },
   messageText: {
     fontSize: 16

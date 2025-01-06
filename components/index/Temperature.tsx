@@ -26,6 +26,7 @@ function Temperature() {
 
   async function fetchTemperature() {
     try {
+      return;
       const response = await fetch(
         "http://192.168.0.106:8080/temperature",
         {

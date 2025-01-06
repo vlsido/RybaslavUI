@@ -32,9 +32,9 @@ function StorageData() {
       const data: SpaceInfo = await response.json();
 
       setStorage({
-        capacity: data.capacity,
-        free: data.free,
-        available: data.available
+        capacity: data.capacity / 1073742000,
+        free: data.free / 1073742000,
+        available: data.available / 1073742000
       })
 
     } catch (error) {
@@ -54,8 +54,10 @@ function StorageData() {
     <ThemedView
       style={styles.container}
     >
-      <ThemedText>
-        {(storage.available / 1000000000).toFixed(2)}GB/{(storage.capacity / 1000000000).toFixed(2)}GB
+      <ThemedText
+        style={styles.text}
+      >
+        {(storage.available).toFixed(0)}GB/{(storage.capacity).toFixed(0)}GB
       </ThemedText>
     </ThemedView>
   );
@@ -72,5 +74,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(20, 5, 10, 1)",
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.5)"
+  },
+  text: {
+    fontSize: 14
   }
 });

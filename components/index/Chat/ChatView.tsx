@@ -13,7 +13,7 @@ import {
   useSharedValue,
   withTiming
 } from "react-native-reanimated";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import MessagesHistory, {
   Message
 } from "./MessagesHistory";
@@ -29,28 +29,41 @@ export default function ChatView() {
   const [messages, setMessages] = useAtom<Message[]>(messagesAtom);
   const [textInput, setTextInput] = useAtom<string>(textInputAtom);
 
+  const textInputRef = useRef<TextInput | null>(null);
+
   const pressOpacity = useSharedValue<number>(1);
 
   const onPress = useCallback(async () => {
     if (textInput === "") return;
 
-    setMessages([...messages, { user: "user", message: textInput }]);
+    const newMessages: Message[] = [...messages, { user: "user", message: textInput }];
+
+    setMessages(newMessages);
+
+    textInputRef.current?.clear();
 
     try {
+
+      const body = {
+        message: textInput
+      }
+
       const response = await fetch(
         "http://192.168.0.106:8080/completion",
         {
-          method: "GET",
+          body: JSON.stringify(body),
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
+
       const data = await response.json();
 
       const dataMessage: string = data.message;
 
-      setMessages([...messages, { user: "assistant", message: dataMessage }]);
+      setMessages([...newMessages, { user: "assistant", message: dataMessage }]);
     } catch (error) {
       console.error("Error fetching completion", error);
     }
@@ -72,7 +85,7 @@ export default function ChatView() {
   }, [onPress]);
 
   function onChangeText(text: string) {
-    setTextInput(text);
+    setTextInput(text.trim());
   }
 
   const pressAnimatedStyle = useAnimatedStyle<ViewStyle>(() => {
@@ -93,6 +106,7 @@ export default function ChatView() {
       >
         <View style={styles.textInputContainer}>
           <TextInput
+            ref={textInputRef}
             placeholder="Message Rybaslav"
             placeholderTextColor={"rgb(233,234,233, 0.5)"}
             onChangeText={(text: string) => onChangeText(text)}
@@ -126,7 +140,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    gap: 20
+    gap: 20,
+    marginBottom: 15
   },
   textField: {
     width: "100%",

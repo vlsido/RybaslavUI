@@ -1,11 +1,18 @@
 import { Image, StyleSheet, View } from "react-native";
 
-function Avatar() {
+interface AvatarProps {
+  user: "assistant" | "user"
+}
+
+function Avatar(props: AvatarProps) {
   return (
     <View style={styles.container}>
+
       <Image
         style={styles.container}
-        source={require("../../../assets/images/defaultAvatarImage.png")}
+        source={props.user === "user"
+          ? require("../../../assets/images/defaultAvatarImage.png")
+          : require("../../../assets/images/defaultAvatarImage.png")}
       />
     </View>
   );

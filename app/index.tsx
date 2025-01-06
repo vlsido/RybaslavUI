@@ -1,4 +1,5 @@
 import ChatView from "@/components/index/Chat/ChatView";
+import ResetMemory from "@/components/index/ResetMemory";
 import StorageData from "@/components/index/StorageData";
 import Temperature from "@/components/index/Temperature";
 import { ThemedText } from "@/components/other/ThemedText";
@@ -31,6 +32,7 @@ export default function Index() {
         </ThemedText>
         <Temperature />
       </View>
+      <ResetMemory />
       <ChatView />
     </ThemedView>
   );
