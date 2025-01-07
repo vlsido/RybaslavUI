@@ -3,6 +3,7 @@ import MessageBox from "./MessageBox";
 import { useAtom } from "jotai";
 import { messagesAtom } from "../atoms";
 import { useEffect, useRef } from "react";
+import { useAudioPlayer } from "expo-audio";
 
 export interface Message {
   user: "assistant" | "user";
@@ -11,6 +12,7 @@ export interface Message {
 
 function MessagesHistory() {
   const [messages] = useAtom<Message[]>(messagesAtom);
+  const audioPlayer = useAudioPlayer();
 
   const flatListRef = useRef<FlatList | null>(null);
 
@@ -30,7 +32,7 @@ function MessagesHistory() {
       onContentSizeChange={scrollToEnd}
       onLayout={() => console.log("layout")}
       renderItem={({ item }) =>
-        <MessageBox user={item.user} message={item.message} />
+        <MessageBox audioPlayer={audioPlayer} user={item.user} message={item.message} />
       }
     />
   );

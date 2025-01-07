@@ -26,7 +26,6 @@ function Temperature() {
 
   async function fetchTemperature() {
     try {
-      return;
       const response = await fetch(
         "http://192.168.0.106:8080/temperature",
         {
@@ -55,6 +54,8 @@ function Temperature() {
   return (
     <ThemedView
       style={styles.container}
+      darkColor="rgba(20, 5, 10, 1)"
+      lightColor="rgba(20, 5, 10, 1)"
     >
       <ThemedText
         style={[
@@ -78,7 +79,6 @@ const styles = StyleSheet.create({
     right: "5%",
     borderRadius: 5,
     paddingHorizontal: 5,
-    backgroundColor: "rgba(20, 5, 10, 1)",
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.5)"
   }

@@ -52,9 +52,13 @@ function StorageData() {
 
   return (
     <ThemedView
+      darkColor="rgba(20, 5, 10, 1)"
+      lightColor="rgba(20, 5, 10, 1)"
       style={styles.container}
     >
       <ThemedText
+        darkColor="rgb(233,234,233)"
+        lightColor="rgb(233,234,233)"
         style={styles.text}
       >
         {(storage.available).toFixed(0)}GB/{(storage.capacity).toFixed(0)}GB
@@ -71,7 +75,6 @@ const styles = StyleSheet.create({
     left: "5%",
     borderRadius: 5,
     paddingHorizontal: 5,
-    backgroundColor: "rgba(20, 5, 10, 1)",
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.5)"
   },

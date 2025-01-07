@@ -27,8 +27,9 @@ import {
 } from "../atoms";
 import { ThemedView } from "@/components/other/ThemedView";
 import { AnimatedPressable } from "@/components/utils/MiscellaneousUtil";
+import { Colors } from "@/constants/Colors";
 
-const newlines_re = new RegExp("\n+");
+const newlines_re = new RegExp("\\r?\\n|\\r", "g");
 
 const isMessageSendActiveAtom = atom<boolean>((get) => {
   const newText = get(textInputAtom).replace(newlines_re, "");
@@ -172,11 +173,13 @@ export default function ChatView() {
   return (
     <ThemedView
       style={styles.container}
+      darkColor={Colors.dark.background}
+      lightColor={Colors.dark.background}
     >
       <MessagesHistory />
       <ThemedView
         darkColor="rgba(33,34,33, 0.9)"
-        lightColor="white"
+        lightColor="rgba(33,34,33, 0.9)"
         style={styles.textField}
       >
         <View style={styles.textInputContainer}>
@@ -217,13 +220,14 @@ export default function ChatView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "80%",
-    maxWidth: 800,
+    width: "100%",
     overflow: "hidden",
+    maxWidth: 800,
+    paddingHorizontal: 15,
     justifyContent: "flex-start",
     alignItems: "flex-start",
     gap: 20,
-    marginBottom: 15
+    marginBottom: 30,
   },
   textField: {
     width: "100%",

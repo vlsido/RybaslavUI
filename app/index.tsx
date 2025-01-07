@@ -10,7 +10,7 @@ import { StyleSheet, View } from "react-native";
 export default function Index() {
   return (
     <ThemedView
-      lightColor={Colors.light.background}
+      lightColor={Colors.dark.background}
       darkColor={Colors.dark.background}
       style={styles.container}
     >
@@ -24,7 +24,7 @@ export default function Index() {
 
         <StorageData />
         <ThemedText
-          lightColor={Colors.light.text}
+          lightColor={Colors.dark.text}
           darkColor={Colors.dark.text}
           style={styles.titleText}
         >

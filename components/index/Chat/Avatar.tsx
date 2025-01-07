@@ -7,12 +7,11 @@ interface AvatarProps {
 function Avatar(props: AvatarProps) {
   return (
     <View style={styles.container}>
-
       <Image
         style={styles.container}
         source={props.user === "user"
           ? require("../../../assets/images/defaultAvatarImage.png")
-          : require("../../../assets/images/defaultAvatarImage.png")}
+          : require("../../../assets/images/rybaslavAvatar.png")}
       />
     </View>
   );
