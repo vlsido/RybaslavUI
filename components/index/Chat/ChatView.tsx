@@ -8,7 +8,6 @@ import {
   ViewStyle
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { atom, useAtom } from "jotai";
 import {
   ReduceMotion,
   runOnJS,
@@ -20,55 +19,49 @@ import { useCallback, useEffect, useRef } from "react";
 import MessagesHistory, {
   Message
 } from "./MessagesHistory";
-import {
-  isShiftPressedAtom,
-  messagesAtom,
-  textInputAtom
-} from "../atoms";
 import { ThemedView } from "@/components/other/ThemedView";
 import { AnimatedPressable } from "@/components/utils/MiscellaneousUtil";
 import { Colors } from "@/constants/Colors";
+import { untracked, useSignal, useSignalEffect } from "@preact/signals-react";
 
 const newlines_re = new RegExp("\\r?\\n|\\r", "g");
 
-const isMessageSendActiveAtom = atom<boolean>((get) => {
-  const newText = get(textInputAtom).replace(newlines_re, "");
-
-  if (newText.length > 0) {
-    return true;
-  } else {
-    return false;
-  }
-});
-
-const isResponseProcessingAtom = atom<boolean>(false);
-
 export default function ChatView() {
-  const [isShiftPressed, setIsShiftPressed] = useAtom<boolean>(isShiftPressedAtom);
-  const [isMessageSendActive] = useAtom<boolean>(isMessageSendActiveAtom);
-  const [isResponseProcessing, setIsResponseProcessing] = useAtom<boolean>(isResponseProcessingAtom);
-  const [messages, setMessages] = useAtom<Message[]>(messagesAtom);
-  const [textInput, setTextInput] = useAtom<string>(textInputAtom);
+  const isShiftPressed = useSignal<boolean>(false);
+  const isMessageSendActive = useSignal<boolean>(false);
+  const isResponseProcessing = useSignal<boolean>(false);
+  const messages = useSignal<Message[]>([]);
+  const textInput = useSignal<string>("");
+
+  useSignalEffect(() => {
+    const textInputFormatted = textInput.value.replace(newlines_re, "");
+
+    if (textInputFormatted.length > 0) {
+      isMessageSendActive.value = untracked(() => true);
+    } else {
+      isMessageSendActive.value = untracked(() => false);
+    }
+  });
 
   const textInputRef = useRef<TextInput | null>(null);
 
   const pressOpacity = useSharedValue<number>(0.5);
 
   const onPress = useCallback(async () => {
-    const formattedTextInput = textInput.trim().replace(newlines_re, " ");
+    const formattedTextInput = textInput.value.trim().replace(newlines_re, " ");
 
     if (formattedTextInput === "") return;
 
-    const newMessages: Message[] = [...messages, { user: "user", message: textInput }];
+    const newMessages: Message[] = [...messages.value, { user: "user", message: textInput.value }];
 
-    setMessages(newMessages);
+    messages.value = newMessages;
 
-    setTextInput("");
+    textInput.value = "";
 
     textInputRef.current?.clear();
 
     try {
-      setIsResponseProcessing(true);
+      isResponseProcessing.value = true;
       const body = {
         message: formattedTextInput
       }
@@ -90,12 +83,12 @@ export default function ChatView() {
 
       const dataMessage: string = data.message;
 
-      setMessages([...newMessages, { user: "assistant", message: dataMessage }]);
+      messages.value = ([...newMessages, { user: "assistant", message: dataMessage }]);
 
     } catch (error) {
       console.error("Error fetching completion", error);
     } finally {
-      setIsResponseProcessing(false);
+      isResponseProcessing.value = false;
     }
   }, [
     textInput,
@@ -106,7 +99,7 @@ export default function ChatView() {
   // [!] keydown is catched by TextInput
   function keyUpHandler({ key }) {
     if (key === "Shift") {
-      setIsShiftPressed(false);
+      isShiftPressed.value = false;
     }
   }
 
@@ -118,34 +111,33 @@ export default function ChatView() {
     }
   }, []);
 
-  useEffect(() => {
-    if (isMessageSendActive === true && isResponseProcessing === false) {
+  useSignalEffect(() => {
+    if (isMessageSendActive.value === true && isResponseProcessing.value === false) {
       pressOpacity.value = withTiming(1, { duration: 150, reduceMotion: ReduceMotion.System });
     } else {
       pressOpacity.value = withTiming(0.5, { duration: 150, reduceMotion: ReduceMotion.System });
 
     }
-  }, [
-    isMessageSendActive,
-    isResponseProcessing
-  ]);
+
+  });
+
 
   function keyDownHandler(keyPressData: NativeSyntheticEvent<TextInputKeyPressEventData>) {
     if (keyPressData.nativeEvent.key === "Shift") {
-      setIsShiftPressed(true);
+      isShiftPressed.value = (true);
     }
 
-    if (isShiftPressed === true
+    if (isShiftPressed.value === true
       && keyPressData.nativeEvent.key === "Enter") {
-      setTextInput(textInput + "\n");
+      textInput.value = (textInput + "\n");
       return;
     }
 
-    if (isShiftPressed === false
+    if (isShiftPressed.value === false
       && keyPressData.nativeEvent.key === "Enter") {
       if (
-        textInput.trim().replace(newlines_re, "").length === 0
-        || isResponseProcessing === true
+        textInput.value.trim().replace(newlines_re, "").length === 0
+        || isResponseProcessing.value === true
       ) {
         return;
       }
@@ -161,7 +153,7 @@ export default function ChatView() {
       return;
     }
 
-    setTextInput(textChangeData.nativeEvent.text);
+    textInput.value = (textChangeData.nativeEvent.text);
   }
 
   const pressAnimatedStyle = useAnimatedStyle<ViewStyle>(() => {
@@ -176,7 +168,7 @@ export default function ChatView() {
       darkColor={Colors.dark.background}
       lightColor={Colors.dark.background}
     >
-      <MessagesHistory />
+      <MessagesHistory messages={messages} />
       <ThemedView
         darkColor="rgba(33,34,33, 0.9)"
         lightColor="rgba(33,34,33, 0.9)"
@@ -189,7 +181,7 @@ export default function ChatView() {
             placeholderTextColor={"rgb(233,234,233, 0.5)"}
             onChange={(textChangeData: NativeSyntheticEvent<TextInputChangeEventData>) =>
               onChange(textChangeData)}
-            value={textInput}
+            value={textInput.value}
             multiline={true}
             style={styles.textInput}
             onKeyPress={(keyPressData) => keyDownHandler(keyPressData)}
@@ -202,8 +194,8 @@ export default function ChatView() {
           ]}
           onPress={onPress}
           disabled={
-            isMessageSendActive === false
-            || isResponseProcessing === true
+            isMessageSendActive.value === false
+            || isResponseProcessing.value === true
           }
         >
           <MaterialIcons

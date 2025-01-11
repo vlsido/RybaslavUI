@@ -1,17 +1,19 @@
 import { FlatList, Pressable, StyleSheet } from "react-native";
 import MessageBox from "./MessageBox";
-import { useAtom } from "jotai";
-import { messagesAtom } from "../atoms";
 import { useEffect, useRef } from "react";
 import { useAudioPlayer } from "expo-audio";
+import { Signal, useSignal } from "@preact/signals-react";
 
 export interface Message {
   user: "assistant" | "user";
   message: string;
 }
 
-function MessagesHistory() {
-  const [messages] = useAtom<Message[]>(messagesAtom);
+interface MessagesHistoryProps {
+  messages: Signal<Message[]>
+}
+
+function MessagesHistory(props: MessagesHistoryProps) {
   const audioPlayer = useAudioPlayer();
 
   const flatListRef = useRef<FlatList | null>(null);
@@ -25,7 +27,7 @@ function MessagesHistory() {
   return (
     <FlatList
       ref={flatListRef}
-      data={messages}
+      data={props.messages.value}
       style={{ width: "100%" }}
       keyExtractor={(item, index) => `${item.user}_${item.message}_${index}`}
       contentContainerStyle={styles.contentContainer}

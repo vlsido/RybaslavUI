@@ -8,7 +8,7 @@ function ResetMemory() {
   const resetMemory = useCallback(async () => {
     try {
       const response = await fetch(
-        "http://192.168.0.106:8080/resetMemory",
+        "http://0.0.0.0:8080/resetMemory",
         {
           method: "GET",
           headers: {

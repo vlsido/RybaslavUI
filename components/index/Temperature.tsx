@@ -1,55 +1,80 @@
-import { atom, useAtom } from "jotai";
+import { useMMKVNumber, useMMKVString } from "react-native-mmkv";
 import { ThemedText } from "../other/ThemedText";
 import { ThemedView } from "../other/ThemedView";
 import { useEffect } from "react";
-import { StyleSheet } from "react-native";
-import { atomWithStorage } from "jotai/utils";
+import { StyleSheet, TextStyle, ViewStyle } from "react-native";
+import { useComputed, useSignal, useSignalEffect } from "@preact/signals-react";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 
-const temperatureAtom = atomWithStorage<number>("temperature", 0);
+const socket = new WebSocket("ws://192.168.0.106:8080/temperature");
 
-const temperatureColorAtom = atom({
-  callback: (temp: number) => {
-    if (temp <= 45)
+function Temperature() {
+  const [cachedTemperature, setCachedTemperature] = useMMKVNumber("temperature");
+  const temperature = useSignal<number>(cachedTemperature ?? 0);
+  const temperatureColor = useSharedValue<string>(getTemperatureColor());
+
+  function getTemperatureColor() {
+    if (temperature.value <= 45)
       return "green"
-    else if (temp > 45 && temp <= 55)
+    else if (temperature.value > 45 && temperature.value <= 55)
       return "rgba(200, 153, 100, 1)"
-    else if (temp > 55 && temp <= 60)
+    else if (temperature.value > 55 && temperature.value <= 60)
       return "orange"
     else
       return "red"
   }
-})
 
-function Temperature() {
-  const [temperature, setTemperature] = useAtom(temperatureAtom);
-  const [temperatureColor] = useAtom(temperatureColorAtom);
-
-  async function fetchTemperature() {
-    try {
-      const response = await fetch(
-        "http://192.168.0.106:8080/temperature",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const data = await response.json();
-
-      setTemperature(data.temperature);
-    } catch (error) {
-      console.error("Error fetching temp", error);
+  useSignalEffect(() => {
+    if (temperature.value) {
+      setCachedTemperature(temperature.value);
     }
+  });
+
+  function handleSocketOpen() {
+    console.log("Socket opened");
   }
 
+  function handleSocketMessage(event: MessageEvent<any>) {
+    console.log("Socket message", typeof event.data);
+    temperature.value = parseFloat(event.data);
+  }
+
+  function handleSocketClose() {
+    console.log("Socket closed");
+    removeSocketListeners();
+  }
+
+  function handleSocketError() {
+    console.log("Socket error");
+    removeSocketListeners();
+  }
+
+  function removeSocketListeners() {
+    socket.removeEventListener("open", handleSocketOpen);
+    socket.removeEventListener("message", (event) => handleSocketMessage(event));
+    socket.removeEventListener("error", handleSocketError);
+    socket.removeEventListener("close", handleSocketClose);
+
+  }
+
+
+
   useEffect(() => {
-    const intervalId = setInterval(fetchTemperature, 1000);
+    socket.addEventListener("open", handleSocketOpen);
+    socket.addEventListener("message", (event) => handleSocketMessage(event));
+    socket.addEventListener("error", handleSocketError);
+    socket.addEventListener("close", handleSocketClose);
 
     return () => {
-      clearInterval(intervalId);
-    };
+      removeSocketListeners();
+    }
   }, []);
+
+  const temperatureTextAnimatedStyle = useAnimatedStyle<TextStyle>(() => {
+    return {
+      color: temperatureColor.value
+    }
+  });
 
   return (
     <ThemedView
@@ -57,16 +82,16 @@ function Temperature() {
       darkColor="rgba(20, 5, 10, 1)"
       lightColor="rgba(20, 5, 10, 1)"
     >
-      <ThemedText
+      <Animated.Text
         style={[
           {
-            color: temperatureColor.callback(temperature),
             fontSize: 14
-          }
+          },
+          temperatureTextAnimatedStyle
         ]}
       >
-        {temperature.toFixed(2)} °C
-      </ThemedText>
+        {temperature.value.toFixed(2)} °C
+      </Animated.Text>
     </ThemedView>
   );
 }

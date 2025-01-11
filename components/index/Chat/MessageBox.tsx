@@ -1,6 +1,6 @@
 import { ThemedText } from "@/components/other/ThemedText";
 import { ThemedView } from "@/components/other/ThemedView";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import Avatar from "./Avatar";
 import { AnimatedPressable } from "@/components/utils/MiscellaneousUtil";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -9,7 +9,9 @@ import {
   useAudioPlayerStatus
 } from "expo-audio";
 import { useEffect, useMemo } from "react";
-import { atom, useAtom } from "jotai";
+import Animated, { FadeIn, SlideInLeft, SlideInRight } from "react-native-reanimated";
+import { useSignal } from "@preact/signals-react";
+import FloatyLoading from "@/components/other/FloatyLoading";
 
 interface MessageBoxProps {
   user: "assistant" | "user";
@@ -19,18 +21,17 @@ interface MessageBoxProps {
 
 function MessageBox(props: MessageBoxProps) {
   const status = useAudioPlayerStatus(props.audioPlayer);
-  const isAudioPlayingAtom = useMemo(() => atom(false), []);
-  const [isAudioPlaying, setIsAudioPlaying] = useAtom<boolean>(isAudioPlayingAtom);
+  const isAudioPlaying = useSignal<boolean>(false);
 
   useEffect(() => {
     if (status.playing === false) {
-      setIsAudioPlaying(false);
+      isAudioPlaying.value = false;
     }
   }, [status.playing]);
 
   async function fetchVoiceOver() {
     try {
-      setIsAudioPlaying(true);
+      isAudioPlaying.value = true;
       const body = {
         message: props.message
       }
@@ -55,12 +56,16 @@ function MessageBox(props: MessageBoxProps) {
 
     } catch (error) {
       console.error("Error fetching voice over", error);
-      setIsAudioPlaying(false);
+      isAudioPlaying.value = false;
     }
   }
 
+  function pauseVoice() {
+    props.audioPlayer.pause();
+  }
+
   return (
-    <ThemedView
+    <Animated.View
       style={[styles.container, {
         flexDirection: props.user === "assistant"
           ? "row"
@@ -70,28 +75,38 @@ function MessageBox(props: MessageBoxProps) {
           ? "rgb(33,34,33)"
           : "rgb(50, 34, 60)"
       }]}
+      entering={FadeIn.duration(300)}
     >
-      {props.user === "assistant" && (
-        <AnimatedPressable
-          onPress={fetchVoiceOver}
-          style={styles.playButtonContainer}
-        >
-          {isAudioPlaying === true ? (
-            <ActivityIndicator
-              size={28}
-              color={"white"}
-            />
-          ) : (
-            <MaterialIcons
-              name="play-arrow"
-              size={28}
-              color={"white"}
-            />
+      {
+        props.user === "assistant" && (
+          <Pressable
+            onPress={fetchVoiceOver}
+            style={styles.playButtonContainer}
+            disabled={isAudioPlaying.value === true}
+          >
+            {isAudioPlaying.value === true ? (
+              <Pressable
+                onPress={pauseVoice}
+                style={styles.playButtonContainer}
+              >
+                <MaterialIcons
+                  name="stop-circle"
+                  size={28}
+                  color={"white"}
+                />
+              </Pressable>
+            ) : (
+              <MaterialIcons
+                name="play-arrow"
+                size={28}
+                color={"white"}
+              />
 
-          )}
+            )}
 
-        </AnimatedPressable>
-      )}
+          </Pressable>
+        )
+      }
       <Avatar user={props.user} />
       <View style={styles.messageContainer}>
         <ThemedText
@@ -107,7 +122,7 @@ function MessageBox(props: MessageBoxProps) {
           {props.message}
         </ThemedText>
       </View>
-    </ThemedView>
+    </Animated.View >
   );
 }
 

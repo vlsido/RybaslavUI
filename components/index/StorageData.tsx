@@ -1,9 +1,9 @@
-import { atom, useAtom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
 import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { ThemedView } from "../other/ThemedView";
 import { ThemedText } from "../other/ThemedText";
+import { useSignal } from "@preact/signals-react";
+import { useMMKVObject } from "react-native-mmkv";
 
 interface SpaceInfo {
   capacity: number,
@@ -11,10 +11,18 @@ interface SpaceInfo {
   available: number,
 }
 
-const storageAtom = atomWithStorage<SpaceInfo | null>("spaceInfo", null);
+
 
 function StorageData() {
-  const [storage, setStorage] = useAtom<SpaceInfo | null>(storageAtom);
+  const [cachedSpaceInfo, setCachedSpaceInfo] = useMMKVObject<SpaceInfo>("storage.spaceinfo");
+
+  const spaceInfo = useSignal<SpaceInfo | null>(cachedSpaceInfo ?? null);
+
+  useSignal(() => {
+    if (spaceInfo.value !== null) {
+      setCachedSpaceInfo(spaceInfo.value);
+    }
+  });
 
   async function fetchStorageData() {
     try {
@@ -31,11 +39,11 @@ function StorageData() {
 
       const data: SpaceInfo = await response.json();
 
-      setStorage({
+      spaceInfo.value = {
         capacity: data.capacity / 1073742000,
         free: data.free / 1073742000,
         available: data.available / 1073742000
-      })
+      };
 
     } catch (error) {
       console.error("Error fetching temp", error);
@@ -46,7 +54,7 @@ function StorageData() {
     fetchStorageData();
   }, []);
 
-  if (storage === null) {
+  if (spaceInfo.value === null) {
     return null;
   }
 
@@ -61,7 +69,7 @@ function StorageData() {
         lightColor="rgb(233,234,233)"
         style={styles.text}
       >
-        {(storage.available).toFixed(0)}GB/{(storage.capacity).toFixed(0)}GB
+        {(spaceInfo.value.available).toFixed(0)}GB/{(spaceInfo.value.capacity).toFixed(0)}GB
       </ThemedText>
     </ThemedView>
   );
