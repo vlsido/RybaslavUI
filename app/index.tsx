@@ -1,40 +1,48 @@
+import {
+  StyleSheet,
+  View
+} from "react-native";
 import ChatView from "@/components/index/Chat/ChatView";
 import ResetMemory from "@/components/index/ResetMemory";
-import StorageData from "@/components/index/StorageData";
 import Temperature from "@/components/index/Temperature";
+import Volume from "@/components/index/Volume/Volume";
 import { ThemedText } from "@/components/other/ThemedText";
 import { ThemedView } from "@/components/other/ThemedView";
+import AudioContextProvider from "@/components/storage/AudioContext";
 import { Colors } from "@/constants/Colors";
-import { StyleSheet, View } from "react-native";
+import Settings from "@/components/other/Settings";
 
 export default function Index() {
   return (
-    <ThemedView
-      lightColor={Colors.dark.background}
-      darkColor={Colors.dark.background}
-      style={styles.container}
-    >
-      <View style={{
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        marginVertical: 10
-      }}>
+    <AudioContextProvider>
+      <ThemedView
+        lightColor={Colors.dark.background}
+        darkColor={Colors.dark.background}
+        style={styles.container}
+      >
+        <View style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          marginVertical: 10
+        }}>
 
-        <StorageData />
-        <ThemedText
-          lightColor={Colors.dark.text}
-          darkColor={Colors.dark.text}
-          style={styles.titleText}
-        >
-          Rybaslav Panel
-        </ThemedText>
+          <ThemedText
+            lightColor={Colors.dark.text}
+            darkColor={Colors.dark.text}
+            style={styles.titleText}
+          >
+            Rybaslav Panel
+          </ThemedText>
+        </View>
+        <ResetMemory />
+        <ChatView />
         <Temperature />
-      </View>
-      <ResetMemory />
-      <ChatView />
-    </ThemedView>
+
+        <Settings />
+      </ThemedView>
+    </AudioContextProvider>
   );
 }
 

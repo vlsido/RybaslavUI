@@ -101,6 +101,7 @@ export default Temperature;
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
+    top: "2.5%",
     right: "5%",
     borderRadius: 5,
     paddingHorizontal: 5,

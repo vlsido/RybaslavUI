@@ -1,8 +1,11 @@
-import { FlatList, Pressable, StyleSheet } from "react-native";
+import {
+  FlatList,
+  StyleSheet
+} from "react-native";
 import MessageBox from "./MessageBox";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useAudioPlayer } from "expo-audio";
-import { Signal, useSignal } from "@preact/signals-react";
+import { Signal } from "@preact/signals-react";
 
 export interface Message {
   user: "assistant" | "user";
@@ -14,8 +17,6 @@ interface MessagesHistoryProps {
 }
 
 function MessagesHistory(props: MessagesHistoryProps) {
-  const audioPlayer = useAudioPlayer();
-
   const flatListRef = useRef<FlatList | null>(null);
 
   function scrollToEnd() {
@@ -34,7 +35,7 @@ function MessagesHistory(props: MessagesHistoryProps) {
       onContentSizeChange={scrollToEnd}
       onLayout={() => console.log("layout")}
       renderItem={({ item }) =>
-        <MessageBox audioPlayer={audioPlayer} user={item.user} message={item.message} />
+        <MessageBox user={item.user} message={item.message} />
       }
     />
   );

@@ -1,26 +1,33 @@
 import { ThemedText } from "@/components/other/ThemedText";
-import { ThemedView } from "@/components/other/ThemedView";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  View
+} from "react-native";
 import Avatar from "./Avatar";
-import { AnimatedPressable } from "@/components/utils/MiscellaneousUtil";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
-  AudioPlayer,
   useAudioPlayerStatus
 } from "expo-audio";
-import { useEffect, useMemo } from "react";
-import Animated, { FadeIn, SlideInLeft, SlideInRight } from "react-native-reanimated";
+import { useEffect } from "react";
+import Animated, {
+  FadeIn
+} from "react-native-reanimated";
 import { useSignal } from "@preact/signals-react";
-import FloatyLoading from "@/components/other/FloatyLoading";
+import useAudio from "@/components/hooks/useAudio";
 
 interface MessageBoxProps {
   user: "assistant" | "user";
   message: string;
-  audioPlayer: AudioPlayer;
 }
 
 function MessageBox(props: MessageBoxProps) {
-  const status = useAudioPlayerStatus(props.audioPlayer);
+  const {
+    audioPlayer,
+    playAudio
+  } = useAudio();
+
+  const status = useAudioPlayerStatus(audioPlayer);
   const isAudioPlaying = useSignal<boolean>(false);
 
   useEffect(() => {
@@ -50,19 +57,16 @@ function MessageBox(props: MessageBoxProps) {
 
       const audioUri = URL.createObjectURL(data);
 
-      props.audioPlayer.replace({ uri: audioUri });
-
-      props.audioPlayer.play();
+      playAudio(audioUri);
 
     } catch (error) {
       console.error("Error fetching voice over", error);
+    } finally {
       isAudioPlaying.value = false;
     }
   }
 
-  function pauseVoice() {
-    props.audioPlayer.pause();
-  }
+
 
   return (
     <Animated.View
@@ -86,7 +90,7 @@ function MessageBox(props: MessageBoxProps) {
           >
             {isAudioPlaying.value === true ? (
               <Pressable
-                onPress={pauseVoice}
+                onPress={() => audioPlayer.pause()}
                 style={styles.playButtonContainer}
               >
                 <MaterialIcons

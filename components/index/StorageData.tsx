@@ -16,7 +16,7 @@ interface SpaceInfo {
 function StorageData() {
   const [cachedSpaceInfo, setCachedSpaceInfo] = useMMKVObject<SpaceInfo>("storage.spaceinfo");
 
-  const spaceInfo = useSignal<SpaceInfo | null>(cachedSpaceInfo ?? null);
+  const spaceInfo = useSignal<SpaceInfo | null>(cachedSpaceInfo ?? { capacity: 0, free: 0, available: 0 });
 
   useSignal(() => {
     if (spaceInfo.value !== null) {
@@ -54,10 +54,6 @@ function StorageData() {
     fetchStorageData();
   }, []);
 
-  if (spaceInfo.value === null) {
-    return null;
-  }
-
   return (
     <ThemedView
       darkColor="rgba(20, 5, 10, 1)"
@@ -79,8 +75,6 @@ export default StorageData;
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
-    left: "5%",
     borderRadius: 5,
     paddingHorizontal: 5,
     borderWidth: 2,
