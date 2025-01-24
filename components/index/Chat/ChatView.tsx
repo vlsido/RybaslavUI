@@ -23,6 +23,7 @@ import { ThemedView } from "@/components/other/ThemedView";
 import { AnimatedPressable } from "@/components/utils/MiscellaneousUtil";
 import { Colors } from "@/constants/Colors";
 import { untracked, useSignal, useSignalEffect } from "@preact/signals-react";
+import { serverAddress } from "@/constants/Server";
 
 const newlines_re = new RegExp("\\r?\\n|\\r", "g");
 
@@ -69,7 +70,7 @@ export default function ChatView() {
       console.log("Stringified body", JSON.stringify(body));
 
       const response = await fetch(
-        "http://192.168.0.106:8080/completion",
+        `http://${serverAddress}/completion`,
         {
           body: JSON.stringify(body),
           method: "POST",

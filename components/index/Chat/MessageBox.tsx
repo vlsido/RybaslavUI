@@ -15,6 +15,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSignal } from "@preact/signals-react";
 import useAudio from "@/components/hooks/useAudio";
+import { serverAddress } from "@/constants/Server";
 
 interface MessageBoxProps {
   user: "assistant" | "user";
@@ -43,7 +44,7 @@ function MessageBox(props: MessageBoxProps) {
         message: props.message
       }
       const response = await fetch(
-        "http://192.168.0.106:8080/voiceOver",
+        `http://${serverAddress}/voiceOver`,
         {
           body: JSON.stringify(body),
           method: "POST",

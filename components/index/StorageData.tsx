@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 import { ThemedView } from "../other/ThemedView";
 import { ThemedText } from "../other/ThemedText";
 import { useSignal } from "@preact/signals-react";
-import { useMMKVObject } from "react-native-mmkv";
+import { serverAddress } from "@/constants/Server";
 
 interface SpaceInfo {
   capacity: number,
@@ -12,22 +12,13 @@ interface SpaceInfo {
 }
 
 
-
 function StorageData() {
-  const [cachedSpaceInfo, setCachedSpaceInfo] = useMMKVObject<SpaceInfo>("storage.spaceinfo");
-
-  const spaceInfo = useSignal<SpaceInfo | null>(cachedSpaceInfo ?? { capacity: 0, free: 0, available: 0 });
-
-  useSignal(() => {
-    if (spaceInfo.value !== null) {
-      setCachedSpaceInfo(spaceInfo.value);
-    }
-  });
+  const storage = useSignal<SpaceInfo | null>(null);
 
   async function fetchStorageData() {
     try {
       const response = await fetch(
-        "http://192.168.0.106:8080/storage",
+        `http://${serverAddress}/storage`,
         {
           method: "GET",
           headers: {
@@ -39,7 +30,7 @@ function StorageData() {
 
       const data: SpaceInfo = await response.json();
 
-      spaceInfo.value = {
+      storage.value = {
         capacity: data.capacity / 1073742000,
         free: data.free / 1073742000,
         available: data.available / 1073742000
@@ -54,6 +45,10 @@ function StorageData() {
     fetchStorageData();
   }, []);
 
+  if (storage.value === null) {
+    return null;
+  }
+
   return (
     <ThemedView
       darkColor="rgba(20, 5, 10, 1)"
@@ -65,7 +60,7 @@ function StorageData() {
         lightColor="rgb(233,234,233)"
         style={styles.text}
       >
-        {(spaceInfo.value.available).toFixed(0)}GB/{(spaceInfo.value.capacity).toFixed(0)}GB
+        {(storage.value.available).toFixed(0)}GB/{(storage.value.capacity).toFixed(0)}GB
       </ThemedText>
     </ThemedView>
   );
@@ -75,6 +70,8 @@ export default StorageData;
 
 const styles = StyleSheet.create({
   container: {
+    position: "absolute",
+    left: "5%",
     borderRadius: 5,
     paddingHorizontal: 5,
     borderWidth: 2,

@@ -1,12 +1,21 @@
-import { useMMKVNumber, useMMKVString } from "react-native-mmkv";
-import { ThemedText } from "../other/ThemedText";
+import { useMMKVNumber } from "react-native-mmkv";
 import { ThemedView } from "../other/ThemedView";
 import { useEffect } from "react";
-import { StyleSheet, TextStyle, ViewStyle } from "react-native";
-import { useComputed, useSignal, useSignalEffect } from "@preact/signals-react";
-import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import {
+  StyleSheet,
+  TextStyle,
+} from "react-native";
+import {
+  useSignal,
+  useSignalEffect
+} from "@preact/signals-react";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue
+} from "react-native-reanimated";
+import { serverAddress } from "@/constants/Server";
 
-const socket = new WebSocket("ws://192.168.0.106:8080/temperature");
+const socket = new WebSocket(`ws://${serverAddress}/temperature`);
 
 function Temperature() {
   const [cachedTemperature, setCachedTemperature] = useMMKVNumber("temperature");
