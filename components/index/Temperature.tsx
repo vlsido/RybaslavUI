@@ -15,9 +15,10 @@ import Animated, {
 } from "react-native-reanimated";
 import { serverAddress } from "@/constants/Server";
 
-const socket = new WebSocket(`ws://${serverAddress}/temperature`);
 
 function Temperature() {
+  const socket = new WebSocket(`ws://${serverAddress}/temperature`);
+
   const [cachedTemperature, setCachedTemperature] = useMMKVNumber("temperature");
   const temperature = useSignal<number>(cachedTemperature ?? 0);
   const temperatureColor = useSharedValue<string>(getTemperatureColor());
