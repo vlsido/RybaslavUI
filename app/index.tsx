@@ -5,7 +5,6 @@ import {
 import ChatView from "@/components/index/Chat/ChatView";
 import ResetMemory from "@/components/index/ResetMemory";
 import Temperature from "@/components/index/Temperature";
-import Volume from "@/components/index/Volume/Volume";
 import { ThemedText } from "@/components/other/ThemedText";
 import { ThemedView } from "@/components/other/ThemedView";
 import AudioContextProvider from "@/components/storage/AudioContext";
@@ -38,7 +37,6 @@ export default function Index() {
         </View>
         <ResetMemory />
         <ChatView />
-        <Temperature />
 
         <Settings />
       </ThemedView>

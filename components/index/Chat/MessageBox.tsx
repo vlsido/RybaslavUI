@@ -67,77 +67,100 @@ function MessageBox(props: MessageBoxProps) {
     }
   }
 
-
-
-  return (
-    <Animated.View
-      style={[styles.container, {
-        flexDirection: props.user === "assistant"
-          ? "row"
-          : "row-reverse",
-        alignItems: "center",
-        backgroundColor: props.user === "assistant"
-          ? "rgb(33,34,33)"
-          : "rgb(50, 34, 60)"
-      }]}
-      entering={FadeIn.duration(300)}
-    >
-      {
-        props.user === "assistant" && (
-          <Pressable
-            onPress={fetchVoiceOver}
-            style={styles.playButtonContainer}
-            disabled={isAudioPlaying.value === true}
-          >
-            {isAudioPlaying.value === true ? (
-              <Pressable
-                onPress={() => audioPlayer.pause()}
-                style={styles.playButtonContainer}
-              >
+  switch (props.user) {
+    case "assistant":
+      return (
+        <Animated.View
+          style={[styles.container]}
+          entering={FadeIn.duration(300)}
+        >
+          <View style={[styles.messageBox, {
+            backgroundColor: "rgb(33,34,33)",
+            flexDirection: "row",
+            alignSelf: "flex-start",
+          }]}>
+            <Pressable
+              onPress={fetchVoiceOver}
+              style={styles.playButtonContainer}
+              disabled={isAudioPlaying.value === true}
+            >
+              {isAudioPlaying.value === true ? (
+                <Pressable
+                  onPress={() => audioPlayer.pause()}
+                  style={styles.playButtonContainer}
+                >
+                  <MaterialIcons
+                    name="stop-circle"
+                    size={28}
+                    color={"white"}
+                  />
+                </Pressable>
+              ) : (
                 <MaterialIcons
-                  name="stop-circle"
+                  name="play-arrow"
                   size={28}
                   color={"white"}
                 />
-              </Pressable>
-            ) : (
-              <MaterialIcons
-                name="play-arrow"
-                size={28}
-                color={"white"}
-              />
 
-            )}
+              )}
 
-          </Pressable>
-        )
-      }
-      <Avatar user={props.user} />
-      <View style={styles.messageContainer}>
-        <ThemedText
-          darkColor="rgb(233,234,233)"
-          lightColor="rgb(233,234,233)"
-          style={[styles.messageText, {
-            textAlign: props.user === "assistant"
-              ? "left"
-              : "right",
-            textAlignVertical: "center"
-          }]}
+            </Pressable>
+            <Avatar user={props.user} />
+            <View style={styles.messageTextContainer}>
+              <ThemedText
+                darkColor="rgb(233,234,233)"
+                lightColor="rgb(233,234,233)"
+                style={[styles.messageText, {
+                  textAlign: "left",
+                  textAlignVertical: "center"
+                }]}
+              >
+                {props.message}
+              </ThemedText>
+            </View>
+          </View>
+        </Animated.View >
+      );
+    case "user":
+      return (
+        <Animated.View
+          style={[styles.container]}
+          entering={FadeIn.duration(300)}
         >
-          {props.message}
-        </ThemedText>
-      </View>
-    </Animated.View >
-  );
+          <View style={[
+            styles.messageBox,
+            {
+              backgroundColor: "rgb(50, 34, 60)",
+              flexDirection: "row-reverse",
+              alignSelf: "flex-end",
+            }
+          ]}>
+            <Avatar user={props.user} />
+            <View style={styles.messageTextContainer}>
+              <ThemedText
+                darkColor="rgb(233,234,233)"
+                lightColor="rgb(233,234,233)"
+                style={[styles.messageText, {
+                  textAlign: "right",
+                  textAlignVertical: "center"
+                }]}
+              >
+                {props.message}
+              </ThemedText>
+            </View>
+          </View>
+        </Animated.View >
+      );
+  }
+
 }
 
 export default MessageBox;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    padding: 8,
-    borderRadius: 10
+    width: "100%",
+    paddingHorizontal: 10
   },
   playButtonContainer: {
     width: 36,
@@ -145,10 +168,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-start"
   },
-  messageContainer: {
-    flex: 1,
+  messageBox: {
+    borderRadius: 10,
+    padding: 8,
+  },
+  messageTextContainer: {
     justifyContent: "center",
+    alignItems: "center",
     marginHorizontal: 10,
+    flex: 1
   },
   messageText: {
     fontSize: 16
