@@ -1,21 +1,25 @@
-import { ThemedText } from "@/components/other/ThemedText";
+import {
+  useCallback,
+  useEffect,
+  useRef
+} from "react";
 import {
   Pressable,
   StyleSheet,
   View
 } from "react-native";
+import { ThemedText } from "@/components/other/ThemedText";
 import Avatar from "./Avatar";
-import { MaterialIcons } from "@expo/vector-icons";
 import {
   useAudioPlayerStatus
 } from "expo-audio";
-import { useEffect } from "react";
 import Animated, {
   FadeIn
 } from "react-native-reanimated";
 import { useSignal } from "@preact/signals-react";
 import useAudio from "@/components/hooks/useAudio";
 import { serverAddress } from "@/constants/Server";
+import TTSButton from "./TTSButton";
 
 interface MessageBoxProps {
   user: "assistant" | "user";
@@ -30,16 +34,39 @@ function MessageBox(props: MessageBoxProps) {
 
   const status = useAudioPlayerStatus(audioPlayer);
   const isAudioPlaying = useSignal<boolean>(false);
+  const isVoiceFetching = useSignal<boolean>(false);
+  const audioUri = useRef<string>("");
+  const isCurrentMessageBoxVoiceActive = useRef<boolean>(false);
 
   useEffect(() => {
-    if (status.playing === false) {
-      isAudioPlaying.value = false;
+    if (isCurrentMessageBoxVoiceActive.current === false) return;
+
+    console.log(status);
+    switch (status.playing) {
+      case true:
+        isAudioPlaying.value = true;
+        isVoiceFetching.value = false;
+        break;
+      case false:
+        isAudioPlaying.value = false;
+        isCurrentMessageBoxVoiceActive.current = false;
+        break;
     }
   }, [status.playing]);
 
-  async function fetchVoiceOver() {
+  const fetchVoiceOver = useCallback(async () => {
     try {
-      isAudioPlaying.value = true;
+
+      if (isAudioPlaying.value === true) return;
+
+      isCurrentMessageBoxVoiceActive.current = true;
+
+      if (audioUri.current !== "") {
+        playAudio(audioUri.current);
+        return;
+      }
+
+      isVoiceFetching.value = true;
       const body = {
         message: props.message
       }
@@ -56,16 +83,21 @@ function MessageBox(props: MessageBoxProps) {
 
       const data = await response.blob();
 
-      const audioUri = URL.createObjectURL(data);
+      audioUri.current = URL.createObjectURL(data);
 
-      playAudio(audioUri);
+      playAudio(audioUri.current);
 
     } catch (error) {
       console.error("Error fetching voice over", error);
-    } finally {
-      isAudioPlaying.value = false;
+      isCurrentMessageBoxVoiceActive.current = false;
+      isVoiceFetching.value = false;
     }
-  }
+  }, [isAudioPlaying]);
+
+  const pauseAudio = useCallback(() => {
+    audioPlayer.pause();
+    audioPlayer.seekTo(0);
+  }, []);
 
   switch (props.user) {
     case "assistant":
@@ -84,26 +116,11 @@ function MessageBox(props: MessageBoxProps) {
               style={styles.playButtonContainer}
               disabled={isAudioPlaying.value === true}
             >
-              {isAudioPlaying.value === true ? (
-                <Pressable
-                  onPress={() => audioPlayer.pause()}
-                  style={styles.playButtonContainer}
-                >
-                  <MaterialIcons
-                    name="stop-circle"
-                    size={28}
-                    color={"white"}
-                  />
-                </Pressable>
-              ) : (
-                <MaterialIcons
-                  name="play-arrow"
-                  size={28}
-                  color={"white"}
-                />
-
-              )}
-
+              <TTSButton
+                isAudioPlaying={isAudioPlaying}
+                isVoiceFetching={isVoiceFetching}
+                onPause={pauseAudio}
+              />
             </Pressable>
             <Avatar user={props.user} />
             <View style={styles.messageTextContainer}>
