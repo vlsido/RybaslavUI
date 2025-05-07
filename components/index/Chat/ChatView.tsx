@@ -10,7 +10,6 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import {
   ReduceMotion,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming

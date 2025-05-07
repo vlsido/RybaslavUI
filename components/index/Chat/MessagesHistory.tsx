@@ -4,7 +4,6 @@ import {
 } from "react-native";
 import MessageBox from "./MessageBox";
 import { useRef } from "react";
-import { useAudioPlayer } from "expo-audio";
 import { Signal } from "@preact/signals-react";
 
 export interface Message {
