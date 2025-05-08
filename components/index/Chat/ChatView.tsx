@@ -215,6 +215,7 @@ const styles = StyleSheet.create({
     width: "100%",
     overflow: "hidden",
     maxWidth: 800,
+    paddingTop: 15,
     paddingHorizontal: 15,
     justifyContent: "flex-start",
     alignItems: "flex-start",
